@@ -16,27 +16,6 @@ mpl.rcParams['figure.figsize'] = (10, 10)
 mpl.rcParams['axes.grid'] = False
 tf.enable_eager_execution()
 
-
-def load_img_file(path_to_img):
-    max_dimension = 512
-    img = Image.open(path_to_img)
-    long = max(img.size)
-    scale = max_dim / long
-    img = img.resize(
-        (round(img.size[0] * scale), round(img.size[1] * scale)), Image.ANTIALIAS)
-    img = keras_image_process.img_to_array(img)
-    img = np.expand_dims(img, axis=0)
-    return img
-
-
-def show_image_with_title(img, title=None):
-    output_image = np.squeeze(img, axis=0)
-    output_image = out.astype(np.uint32)
-    if title is not None:
-        plt.title(title)
-    plt.imshow(output_image)
-
-
 class ContentAndStyleImage(object):
     def __init__(self, path_to_content_img, path_to_style_img):
         self.content_image = self._get_image(path_to_content_img)
