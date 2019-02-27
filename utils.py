@@ -84,7 +84,7 @@ class ContentAndStyleImage(object):
 
 class Model(object):
     def __init__(self):
-        self.content_layers = ['block4_conv3']
+        self.content_layers = ['block5_conv2']
         # Style layer we are interested in
         self.style_layers = [
             'block1_conv1',
@@ -92,6 +92,7 @@ class Model(object):
             'block3_conv1',
             'block4_conv1',
             'block5_conv1',
+            # 'block2_conv2',
         ]
 
         self.num_content_layers = len(self.content_layers)
@@ -249,7 +250,8 @@ class Model(object):
         init_image = content_and_style_class.processed_content_image
         init_image = tfe.Variable(init_image, dtype=tf.float32)
         # Create our optimizer
-        opt = tf.train.AdamOptimizer(learning_rate=5, beta1=0.99, epsilon=1e-1)
+        opt = tf.train.AdamOptimizer(
+            learning_rate=5, beta1=0.99, epsilon=1e-1)
 
         # For displaying intermediate images
         iter_count = 1
