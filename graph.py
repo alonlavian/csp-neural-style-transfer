@@ -6,9 +6,9 @@ from scipy.optimize import fmin_l_bfgs_b
 from tensorflow.contrib.keras.api.keras.applications import vgg19
 from tensorflow.contrib.keras.api.keras.preprocessing.image import load_img, img_to_array
 
-CONTENT_IMG_PATH = '/images/content.jpg'
-STYLE_IMG_PATH = '/images/style.jpg'
-OUTPUT_PATH = '/output/gen_img.jpg'
+CONTENT_IMG_PATH = './tmp/nst/Tuebingen_Neckarfront.jpg'
+STYLE_IMG_PATH = './tmp/nst/1024px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg'
+OUTPUT_PATH = 'gen_img.jpg'
 # Number of iterations to run
 ITER = 10
 # Weights of losses
@@ -67,7 +67,8 @@ input_tensor = K.concatenate([content_img, style_img, gen_img], axis=0)
 
 # Create a vgg19 model by running the input tensor though the vgg19 convolutional
 # neural network, excluding the fully connected layers
-model = vgg19.VGG19(include_top=False, weights='imagenet', input_tensor=input_tensor)
+model = vgg19.VGG19(include_top=False, weights='imagenet',
+                    input_tensor=input_tensor)
 print('Model loaded')
 
 # Create an output dictionary
@@ -124,7 +125,8 @@ content_img_features = layer_features[0, :, :, :]
 gen_img_features = layer_features[2, :, :, :]
 loss += CONTENT_WEIGHT * content_loss(content_img_features, gen_img_features)
 
-feature_layer_names = ['block1_conv1', 'block2_conv1', 'block3_conv1', 'block4_conv1', 'block5_conv1']
+feature_layer_names = ['block1_conv1', 'block2_conv1',
+                       'block3_conv1', 'block4_conv1', 'block5_conv1']
 for name in feature_layer_names:
     layer_features = outputs_dict[name]
     style_features = layer_features[1, :, :, :]
@@ -190,9 +192,10 @@ x = preprocess(CONTENT_IMG_PATH)
 for i in range(ITER):
     print('Step {}'.format(i))
     start_time = time.time()
-    x, min_val, info = fmin_l_bfgs_b(evaluator.loss, x.flatten(), fprime=evaluator.grads, maxiter=300)
+    x, min_val, info = fmin_l_bfgs_b(
+        evaluator.loss, x.flatten(), fprime=evaluator.grads, maxiter=500)
     print('    loss: {}'.format(min_val))
     # Save img
     img = deprocess_image(x)
-    imsave('/output/img{}.jpg'.format(i), img)
+    imsave('img{}.jpg'.format(i), img)
     print('     Image saved. Time: {}'.format(time.time() - start_time))

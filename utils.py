@@ -12,9 +12,9 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-mpl.rcParams['figure.figsize'] = (10, 10)
 mpl.rcParams['axes.grid'] = False
 tf.enable_eager_execution()
+
 
 class ContentAndStyleImage(object):
     def __init__(self, path_to_content_img, path_to_style_img):
@@ -122,6 +122,14 @@ class Model(object):
         # / (4. * (channels ** 2) * (width * height) ** 2)
         return tf.reduce_mean(tf.square(gram_style - gram_target))
 
+    def _get_total_variational_loss(self, content, ):
+        _, img_h, img_w, channels = content.shape
+        a = tf.square(content[:, :img_h - 1, :img_w - 1,
+                              :] - content[:, 1:, :img_w - 1, :])
+        b = tf.square(content[:, :img_h - 1, :img_w - 1,
+                              :] - content[:, :img_h - 1, 1:, :])
+        return tf.reduce_sum(tf.pow(a + b, 1.25))
+
     def _get_feature_representations(self, content_and_style_class):
         """Helper function to compute our content and style feature representations.
 
@@ -152,7 +160,7 @@ class Model(object):
                             for content_layer in content_outputs[self.num_style_layers:]]
         return style_features, content_features
 
-    def _compute_loss(self, loss_weights, init_image, gram_style_features, content_features):
+    def _compute_loss(self, loss_weights, init_image, gram_style_features, content_features, TA_weight=1):
         """This function will compute the loss total loss.
             ****Taken From Code Implementation****
         Arguments:
@@ -182,7 +190,7 @@ class Model(object):
 
         total_style_score = 0
         total_content_score = 0
-
+        total_TA_score = 0
         # Accumulate style losses from all layers
         # Here, we equally weight each contribution of each loss layer
         averge_style_weight = 1.0 / float(self.num_style_layers)
@@ -195,12 +203,14 @@ class Model(object):
         for target_content, comb_content in zip(content_features, content_output_features):
             total_content_score += average_content_weight * \
                 self._get_content_loss(comb_content[0], target_content)
-
+        average_TA_weight = 1.0 / float(self.num_content_layers)
+        total_TA_score = self._get_total_variational_loss(
+            init_image) * TA_weight
         total_style_score *= style_weight
         total_content_score *= content_weight
 
         # Get total loss
-        total_loss = total_style_score + total_content_score
+        total_loss = total_style_score + total_content_score + total_TA_score
         return total_loss, total_style_score, total_content_score
 
     def _compute_gradients(self, config):
@@ -211,7 +221,7 @@ class Model(object):
             return tape.gradient(total_loss, config['init_image']), all_loss
 
     def run_style_transfer(self, content_and_style_class,
-                           num_iterations=1000,
+                           num_iterations=3000,
                            content_weight=1e3,
                            style_weight=1e-2):
         # trainable to false.
@@ -227,7 +237,7 @@ class Model(object):
 
         # Set initial image
         init_image = content_and_style_class.processed_content_image
-        init_image = tfe.Variable(init_image, dtype=tf.float32)
+        init_image = tf.Variable(init_image, dtype=tf.float32)
         # Create our optimizer
         opt = tf.train.AdamOptimizer(
             learning_rate=5, beta1=0.99, epsilon=1e-1)
