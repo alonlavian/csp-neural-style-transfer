@@ -188,7 +188,8 @@ evaluator = Evaluator()
 
 # Run L-BFGS optimizer
 x = preprocess(CONTENT_IMG_PATH)
-
+opt = tf.train.AdamOptimizer(
+    learning_rate=5, beta1=0.99, epsilon=1e-1).minimize(evaluator.loss(x))
 for i in range(ITER):
     print('Step {}'.format(i))
     start_time = time.time()

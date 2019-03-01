@@ -63,7 +63,7 @@ class ContentAndStyleImage(object):
 
 class Model(object):
     def __init__(self):
-        self.content_layers = ['block5_conv2']
+        self.content_layers = ['block5_conv2', 'block5_conv3']
         # Style layer we are interested in
         self.style_layers = [
             'block1_conv1',
@@ -123,12 +123,7 @@ class Model(object):
         return tf.reduce_mean(tf.square(gram_style - gram_target))
 
     def _get_total_variational_loss(self, content, ):
-        _, img_h, img_w, channels = content.shape
-        a = tf.square(content[:, :img_h - 1, :img_w - 1,
-                              :] - content[:, 1:, :img_w - 1, :])
-        b = tf.square(content[:, :img_h - 1, :img_w - 1,
-                              :] - content[:, :img_h - 1, 1:, :])
-        return tf.reduce_sum(tf.pow(a + b, 1.25))
+        return tf.reduce_sum(tf.image.total_variation(content))
 
     def _get_feature_representations(self, content_and_style_class):
         """Helper function to compute our content and style feature representations.
@@ -160,7 +155,7 @@ class Model(object):
                             for content_layer in content_outputs[self.num_style_layers:]]
         return style_features, content_features
 
-    def _compute_loss(self, loss_weights, init_image, gram_style_features, content_features, TA_weight=1):
+    def _compute_loss(self, loss_weights, init_image, gram_style_features, content_features, TA_weight):
         """This function will compute the loss total loss.
             ****Taken From Code Implementation****
         Arguments:
@@ -221,9 +216,10 @@ class Model(object):
             return tape.gradient(total_loss, config['init_image']), all_loss
 
     def run_style_transfer(self, content_and_style_class,
-                           num_iterations=3000,
-                           content_weight=1e3,
-                           style_weight=1e-2):
+                           num_iterations=2000,
+                           content_weight=1e0,
+                           style_weight=1e2,
+                           ta_weight=1):
         # trainable to false.
         # We don't need to (or want to) train any layers of our model, so we set their
         for layer in self.model.layers:
@@ -254,7 +250,8 @@ class Model(object):
             'loss_weights': loss_weights,
             'init_image': init_image,
             'gram_style_features': gram_style_features,
-            'content_features': content_features
+            'content_features': content_features,
+            "TA_weight": ta_weight,
         }
 
         # For displaying
