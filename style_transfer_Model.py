@@ -8,6 +8,7 @@ import tensorflow.contrib.eager as tfe
 import tensorflow as tf
 import functools
 import time
+import os
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,6 +19,8 @@ tf.enable_eager_execution()
 
 class ContentAndStyleImage(object):
     def __init__(self, path_to_content_img, path_to_style_img):
+        self.path_to_style_img = path_to_style_img
+        self.path_to_content_img = path_to_content_img
         self.content_image = self._get_image(path_to_content_img)
         self.style_image = self._get_image(path_to_style_img)
         self.process_images()
@@ -63,7 +66,7 @@ class ContentAndStyleImage(object):
 
 class Model(object):
     def __init__(self):
-        self.content_layers = ['block5_conv2', 'block5_conv3']
+        self.content_layers = ['block5_conv2']
         # Style layer we are interested in
         self.style_layers = [
             'block1_conv1',
@@ -219,7 +222,8 @@ class Model(object):
                            num_iterations=2000,
                            content_weight=1e0,
                            style_weight=1e2,
-                           ta_weight=1):
+                           ta_weight=1,
+                           save=False):
         # trainable to false.
         # We don't need to (or want to) train any layers of our model, so we set their
         for layer in self.model.layers:
@@ -242,7 +246,8 @@ class Model(object):
         iter_count = 1
 
         # Store our best result
-        best_loss, best_img = float('inf'), None
+        best_loss, best_img = float(
+            'inf'), content_and_style_class.processed_content_image
 
         # Create a nice config
         loss_weights = (style_weight, content_weight)
@@ -266,6 +271,13 @@ class Model(object):
         max_vals = 255 - norm_means
 
         imgs = []
+        _, style_tail = os.path.split(
+            content_and_style_class.path_to_style_img)
+        _, content_tail = os.path.split(
+            content_and_style_class.path_to_content_img)
+
+        print(
+            f"Initializing Transfer of Style from image: {style_tail} upon image: {content_tail}")
         for i in tqdm(range(num_iterations)):
             grads, all_loss = self._compute_gradients(config)
             loss, style_score, content_score = all_loss
@@ -282,15 +294,17 @@ class Model(object):
             if i % 100 == 0:
                 imgs.append(content_and_style_class.deprocess_image(
                     (init_image.numpy())))
-        print('Total time: {:.4f}s'.format(time.time() - global_start))
-        plt.figure(figsize=(14, 4))
-        fig, ax = plt.subplots(num_iterations // 100, 1)
-        for i, img in enumerate(imgs):
-            ax[i].imshow(img)
-            # ax[i].xticks([])
-            # ax[i].yticks([])
-        fig.savefig("image")
-        fig_best, ax_best = plt.subplots(1, 1)
-        ax_best.imshow(best_img)
-        fig_best.savefig("image_best")
+        print('Finished Style Transfer; Total time: {:.4f}s'.format(
+            time.time() - global_start))
+        if save:
+            plt.figure(figsize=(14, 4))
+            fig, ax = plt.subplots(num_iterations // 100, 1)
+            for i, img in enumerate(imgs):
+                ax[i].imshow(img)
+                # ax[i].xticks([])
+                # ax[i].yticks([])
+            fig.savefig("image")
+            fig_best, ax_best = plt.subplots(1, 1)
+            ax_best.imshow(best_img)
+            fig_best.savefig("image_best")
         return best_img, best_loss
