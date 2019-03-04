@@ -1,23 +1,26 @@
+"""
+Module containing functions to apply nst on images in a directory
+"""
+
 import argparse
 import os.path
-import PIL
-import ipdb
 import sys
+import PIL
 import tensorflow as tf
-import style_transfer_Model as nst
+import nst_model as nst
 
 
 def run_nst(content_path, style_path, model, num_iterations):
     ''' docstring :) '''
     images = nst.ContentAndStyleImage(content_path, style_path)
-    best_img, best_loss = model.run_style_transfer(
+    best_img, _ = model.run_style_transfer(
         images, num_iterations=num_iterations)
     return best_img
 
 
 def modify(directory, style_path, num_iterations):
     ''' docstring :) '''
-    model = nst.Model()
+    model = nst.NSTModel()
     tf.logging.set_verbosity(tf.logging.FATAL)
     # obtains content image and all other images in its directory
     # directory = os.path.dirname(os.path.abspath(content_path))
@@ -35,7 +38,7 @@ def modify(directory, style_path, num_iterations):
             try:
                 new_img = run_nst(f"{directory}/{file}",
                                   style_path, model, num_iterations)
-                head, tail = os.path.split(file)
+                _, tail = os.path.split(file)
                 new_img = PIL.Image.fromarray(new_img)
                 new_img_filename = os.path.join(
                     new_dir, tail)  # f"{tail}_modified"
@@ -50,7 +53,8 @@ if __name__ == "__main__":
     tf.app.flags.DEFINE_string(
         "directory", "./tmp/nst/", "Directory of images to apply transformation")
     tf.app.flags.DEFINE_string(
-        "style_path", "./tmp/nst/The_Great_Wave_off_Kanagawa.jpg", "Path to the style image")
+        "style_path", "./tmp/nst/The_Great_Wave_off_Kanagawa.jpg",
+        "Path to the style image")
     tf.app.flags.DEFINE_integer(
         "iterations", 1000, "Number of iterations to run optimizations for")
     args = tf.app.flags.FLAGS
