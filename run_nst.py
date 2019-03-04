@@ -11,7 +11,16 @@ import nst_model as nst
 
 
 def run_nst(content_path, style_path, model, num_iterations):
-    ''' docstring :) '''
+    """
+    Function that runs nst
+    Arguments:
+        content_path: Path to content image
+        style_path: Path to style image
+        model: Instance of nst.NSTModel
+        num_iterations: Total number of optimization steps to run
+    Returns:
+        Optimized image as np.array
+    """
     images = nst.ContentAndStyleImage(content_path, style_path)
     best_img, _ = model.run_style_transfer(
         images, num_iterations=num_iterations)
@@ -19,9 +28,16 @@ def run_nst(content_path, style_path, model, num_iterations):
 
 
 def modify(directory, style_path, num_iterations):
-    ''' docstring :) '''
+    """
+    Function that runs run_nst on all images on a directory
+    Arguments:
+        directory: Directory containing image files
+        style_path: Path to style image
+        num_iterations: Total number of optimization steps to run
+    Returns:
+        None
+    """
     model = nst.NSTModel()
-    tf.logging.set_verbosity(tf.logging.FATAL)
     # obtains content image and all other images in its directory
     # directory = os.path.dirname(os.path.abspath(content_path))
 

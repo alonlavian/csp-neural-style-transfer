@@ -155,6 +155,8 @@ class NSTModel():
         Arguments:
             style: Style image
             gram_target: Gram matrix of the target image
+        Returns:
+            total style loss as scaled squared difference between the gram matricies
         """
         # height, width, num filters of each layer
         # We scale the loss at a given layer by the size of the feature map and the number of filters
