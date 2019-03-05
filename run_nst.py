@@ -27,7 +27,7 @@ def run_nst(content_path, style_path, model, num_iterations):
     return best_img
 
 
-def modify(directory, style_path, num_iterations):
+def modify_directory(directory, style_path, num_iterations):
     """
     Function that runs run_nst on all images on a directory
     Arguments:
@@ -57,20 +57,49 @@ def modify(directory, style_path, num_iterations):
                 _, tail = os.path.split(file)
                 new_img = PIL.Image.fromarray(new_img)
                 new_img_filename = os.path.join(
-                    new_dir, tail)  # f"{tail}_modified"
+                    new_dir, f"modified_{tail}")  # f"{tail}_modified"
                 new_img.save(new_img_filename)
             except KeyboardInterrupt:
                 print("Action Cancelled By User")
                 sys.exit()
+            except FileNotFoundError:
+                print("Please enter valid file paths")
+
+
+def modify_image(content_path, style_path, num_iterations):
+    """
+    Function that runs run_nst on one image
+    Arguments:
+        content_path: Path to content image
+        style_path: Path to style image
+        num_iterations: Total number of optimization steps to run
+    Returns:
+        None
+    """
+    model = nst.NSTModel()
+    try:
+        new_img = run_nst(f"{content_path}",
+                          style_path, model, num_iterations)
+        new_img = PIL.Image.fromarray(new_img)
+        head, tail = os.path.split(content_path)
+        new_img_filename = f"./{head}/modified_{tail}"  # f"{tail}_modified"
+        new_img.save(new_img_filename)
+    except KeyboardInterrupt:
+        print("Action Cancelled By User")
+        sys.exit()
+    except FileNotFoundError:
+        print("Please enter valid file paths")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     tf.app.flags.DEFINE_string(
-        "directory", "./tmp/nst/", "Directory of images to apply transformation")
+        "content_directory", None, "Directory of images to apply transformation")
     tf.app.flags.DEFINE_string(
-        "style_path", "./tmp/nst/The_Great_Wave_off_Kanagawa.jpg",
+        "style_path", None,
         "Path to the style image")
+    tf.app.flags.DEFINE_string(
+        "content_path", None, "Image to apply transformation on")
     tf.app.flags.DEFINE_integer(
         "iterations", 1000, "Number of iterations to run optimizations for")
     args = tf.app.flags.FLAGS
@@ -78,4 +107,13 @@ if __name__ == "__main__":
     # parser.add_argument("--style_path", "-s", type=str)
     # parser.add_argument("--iterations", "-i", type=int, default=1000)
     # args = parser.parse_args()
-    modify(args.directory, args.style_path, args.iterations)
+    if args.style_path:
+        if args.content_directory:
+            modify_directory(args.content_directory,
+                             args.style_path, args.iterations)
+        elif args.content_path:
+            modify_image(args.content_path, args.style_path, args.iterations)
+        else:
+            print("Please specify either content image or content directory")
+    else:
+        print("Please specify style path")
