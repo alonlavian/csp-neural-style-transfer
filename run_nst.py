@@ -7,7 +7,7 @@ import os.path
 import sys
 import PIL
 import tensorflow as tf
-import nst_model as nst
+import test as nst
 
 
 def run_nst(content_path, style_path, model, num_iterations):
