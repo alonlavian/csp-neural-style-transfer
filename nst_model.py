@@ -270,7 +270,7 @@ class NSTModel():
                            num_iterations=1000,
                            content_weight=0,
                            style_weight=100,
-                           ta_weight=0,
+                           ta_weight=5,
                            save=False):
         """
         Function that runs the nst
