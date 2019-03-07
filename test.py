@@ -16,7 +16,7 @@ mpl.rcParams['axes.grid'] = False
 tf.enable_eager_execution()
 
 
-class ContentAndStyleImage(object):
+class ContentAndStyleImage():
     """
     Class that contains and processes content and style images for the nst
     Arguments:
@@ -80,7 +80,7 @@ class ContentAndStyleImage(object):
         return img_to_unprocess
 
 
-class NSTModel(object):
+class NSTModel():
     """
     Model contains all nst methods
     """

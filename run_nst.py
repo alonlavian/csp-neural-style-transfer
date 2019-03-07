@@ -42,14 +42,15 @@ def modify_directory(directory, style_path, num_iterations):
     # directory = os.path.dirname(os.path.abspath(content_path))
 
     # new directory to store modified images
-    new_dir = os.path.join(directory, 'modified')
+    _, style_tail = os.path.split(style_path)
+    new_dir = os.path.join(directory, f"{style_tail[:-4]}_modified")
     try:
         os.mkdir(new_dir)
     except FileExistsError:
         pass
     # for every file, modify and place in new directory
     for file in os.listdir(directory):
-        if not os.path.isdir(file) and file != "modified":
+        if not os.path.isdir(file) and "modified" not in file:
             # ipdb.set_trace()
             try:
                 new_img = run_nst(f"{directory}/{file}",
