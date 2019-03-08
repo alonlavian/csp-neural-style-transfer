@@ -92,6 +92,11 @@ def modify_image(content_path, style_path, num_iterations):
         print("Please enter valid file paths")
 
 
+def run_all():
+    for i in os.listdir("./style_images"):
+        modify_directory("./content_images", f"./style_images/{i}", 1000)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     tf.app.flags.DEFINE_string(
@@ -103,11 +108,14 @@ if __name__ == "__main__":
         "content_path", None, "Image to apply transformation on")
     tf.app.flags.DEFINE_integer(
         "iterations", 1000, "Number of iterations to run optimizations for")
+    tf.app.flags.DEFINE_bool("all", False, "")
     args = tf.app.flags.FLAGS
     # parser.add_argument("--directory", "-d", type=str)
     # parser.add_argument("--style_path", "-s", type=str)
     # parser.add_argument("--iterations", "-i", type=int, default=1000)
     # args = parser.parse_args()
+    if args.all:
+        run_all()
     if args.style_path:
         if args.content_directory:
             modify_directory(args.content_directory,
