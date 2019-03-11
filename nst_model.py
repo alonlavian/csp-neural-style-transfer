@@ -47,6 +47,7 @@ class ContentAndStyleImage():
         scale = max_dimension / long
         img = img.resize(
             (round(img.size[0] * scale), round(img.size[1] * scale)), Image.ANTIALIAS)
+        img = img.convert("RGB")
         img = keras_image_process.img_to_array(img)
         img = np.expand_dims(img, axis=0)
         return img

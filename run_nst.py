@@ -93,8 +93,8 @@ def modify_image(content_path, style_path, num_iterations):
 
 
 def run_all():
-    for i in os.listdir("./style_images"):
-        modify_directory("./content_images", f"./style_images/{i}", 1000)
+    for i in os.listdir("./style_images_2"):
+        modify_directory("./content_images", f"./style_images_2/{i}", 1000)
 
 
 if __name__ == "__main__":
