@@ -7,10 +7,10 @@ import os.path
 import sys
 import PIL
 import tensorflow as tf
-import test as nst
+import nst_model as nst
 
 
-def run_nst(content_path, style_path, model, num_iterations):
+def run_nst(content_path, style_path, model, num_iterations, max_resolution=512):
     """
     Function that runs nst
     Arguments:
@@ -21,7 +21,7 @@ def run_nst(content_path, style_path, model, num_iterations):
     Returns:
         Optimized image as np.array
     """
-    images = nst.ContentAndStyleImage(content_path, style_path)
+    images = nst.ContentAndStyleImage(content_path, style_path, max_resolution)
     best_img, _ = model.run_style_transfer(
         images, num_iterations=num_iterations)
     return best_img
@@ -67,7 +67,7 @@ def modify_directory(directory, style_path, num_iterations):
                 print("Please enter valid file paths")
 
 
-def modify_image(content_path, style_path, num_iterations):
+def modify_image(content_path, style_path, num_iterations, max_resolution):
     """
     Function that runs run_nst on one image
     Arguments:
@@ -80,7 +80,7 @@ def modify_image(content_path, style_path, num_iterations):
     model = nst.NSTModel()
     try:
         new_img = run_nst(f"{content_path}",
-                          style_path, model, num_iterations)
+                          style_path, model, num_iterations, max_resolution=max_resolution)
         new_img = PIL.Image.fromarray(new_img)
         head, tail = os.path.split(content_path)
         new_img_filename = f"./{head}/modified_{tail}"  # f"{tail}_modified"
@@ -107,6 +107,8 @@ if __name__ == "__main__":
     tf.app.flags.DEFINE_string(
         "content_path", None, "Image to apply transformation on")
     tf.app.flags.DEFINE_integer(
+        "max_resolution", 512, "Maximum Resolution")
+    tf.app.flags.DEFINE_integer(
         "iterations", 1000, "Number of iterations to run optimizations for")
     tf.app.flags.DEFINE_bool("all", False, "")
     args = tf.app.flags.FLAGS
@@ -119,9 +121,10 @@ if __name__ == "__main__":
     if args.style_path:
         if args.content_directory:
             modify_directory(args.content_directory,
-                             args.style_path, args.iterations)
+                             args.style_path, args.iterations, args.max_resolution)
         elif args.content_path:
-            modify_image(args.content_path, args.style_path, args.iterations)
+            modify_image(args.content_path, args.style_path,
+                         args.iterations, args.max_resolution)
         else:
             print("Please specify either content image or content directory")
     else:

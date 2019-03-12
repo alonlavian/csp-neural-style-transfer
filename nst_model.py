@@ -26,14 +26,15 @@ class ContentAndStyleImage():
         None
     """
 
-    def __init__(self, path_to_content_img, path_to_style_img):
+    def __init__(self, path_to_content_img, path_to_style_img, max_resolution):
         self.path_to_style_img = path_to_style_img
         self.path_to_content_img = path_to_content_img
-        self.content_image = self._get_image(path_to_content_img)
-        self.style_image = self._get_image(path_to_style_img)
+        self.content_image = self._get_image(
+            path_to_content_img, max_resolution)
+        self.style_image = self._get_image(path_to_style_img, max_resolution)
         self.process_images()
 
-    def _get_image(self, path_to_img):
+    def _get_image(self, path_to_img, max_resolution):
         """
         Internal function to get image as a numpy array
         Arguments:
@@ -41,13 +42,13 @@ class ContentAndStyleImage():
         Returns:
             image as a numpy array
         """
-        max_dimension = 512
+        max_dimension = max_resolution
         img = Image.open(path_to_img)
         long = max(img.size)
         scale = max_dimension / long
+        img = img.convert("RGB")
         img = img.resize(
             (round(img.size[0] * scale), round(img.size[1] * scale)), Image.ANTIALIAS)
-        img = img.convert("RGB")
         img = keras_image_process.img_to_array(img)
         img = np.expand_dims(img, axis=0)
         return img
@@ -165,8 +166,8 @@ class NSTModel():
         height, width, channels = style.get_shape().as_list()
         gram_style = self._get_gram_matrix(style)
 
-        return tf.reduce_mean(tf.square(gram_style - gram_target)) /     \
-            (4. * (channels ** 2) * (width * height) ** 2)
+        # / (4. * (channels ** 2) * (width * height) ** 2)
+        return tf.reduce_mean(tf.square(gram_style - gram_target))
 
     def _get_total_variational_loss(self, content):
         """
@@ -203,7 +204,7 @@ class NSTModel():
         return style_features, content_features
 
     def _compute_loss(self, loss_weights, init_image, gram_style_features,
-                      content_features, ta_weight):
+                      content_features, ta_weight=1):
         """
         Computes the total loss.
         Arguments:
@@ -233,15 +234,13 @@ class NSTModel():
         # Accumulate style losses from all layers
         # Here, we equally weight each contribution of each loss layer
         averge_style_weight = 1.0 / float(self.num_style_layers)
-        for target_style, comb_style in zip(gram_style_features,
-                                            style_output_features):
+        for target_style, comb_style in zip(gram_style_features, style_output_features):
             total_style_score += averge_style_weight * \
                 self._get_style_loss(comb_style[0], target_style)
 
         # Accumulate content losses from all layers
         average_content_weight = 1.0 / float(self.num_content_layers)
-        for target_content, comb_content in zip(content_features,
-                                                content_output_features):
+        for target_content, comb_content in zip(content_features, content_output_features):
             total_content_score += average_content_weight * \
                 self._get_content_loss(comb_content[0], target_content)
         total_ta_score = self._get_total_variational_loss(
@@ -268,10 +267,10 @@ class NSTModel():
             return tape.gradient(total_loss, config['init_image']), all_loss
 
     def run_style_transfer(self, content_and_style_class,
-                           num_iterations=1000,
-                           content_weight=0,
-                           style_weight=100,
-                           ta_weight=5,
+                           num_iterations=3000,
+                           content_weight=1e-1,
+                           style_weight=1e2,
+                           ta_weight=1,
                            save=False):
         """
         Function that runs the nst
@@ -285,9 +284,12 @@ class NSTModel():
         Returns:
             Best optimized image and best loss
         """
+        # trainable to false.
+        # We don't need to (or want to) train any layers of our model, so we set their
         for layer in self.model.layers:
             layer.trainable = False
 
+        # Get the style and content feature representations (from our specified intermediate layers)
         style_features, content_features = self._get_feature_representations(
             content_and_style_class)
         gram_style_features = [self._get_gram_matrix(style_feature)
@@ -300,8 +302,8 @@ class NSTModel():
         opt = tf.train.AdamOptimizer(
             learning_rate=5, beta1=0.99, epsilon=1e-1)
 
-        best_loss, best_img = float(
-            'inf'), None
+        # Store our best result
+        best_loss, best_img = float('inf'), None
 
         # Create a nice config
         loss_weights = (style_weight, content_weight)
@@ -312,6 +314,7 @@ class NSTModel():
             'content_features': content_features,
             "ta_weight": ta_weight,
         }
+
         # For displaying
         global_start = time.time()
 
@@ -330,7 +333,7 @@ class NSTModel():
         )
         for i in tqdm(range(num_iterations)):
             grads, all_loss = self._compute_gradients(config)
-            loss, _, _ = all_loss
+            loss, style_score, content_score = all_loss
             opt.apply_gradients([(grads, init_image)])
             clipped = tf.clip_by_value(init_image, min_vals, max_vals)
             init_image.assign(clipped)
