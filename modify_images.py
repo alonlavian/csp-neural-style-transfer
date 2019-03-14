@@ -81,7 +81,7 @@ def modify_image(content_path, style_path, num_iterations, max_resolution, borde
     model = nst.NSTModel()
     try:
         new_img = run_nst(content_path,
-                          style_path, model, num_iterations, \ 
+                          style_path, model, num_iterations, \
                           max_resolution=max_resolution, border_size=border_size)
         new_img = PIL.Image.fromarray(new_img)
         head, tail = os.path.split(content_path)
@@ -127,7 +127,7 @@ if __name__ == "__main__":
                              args.style_path, args.iterations, args.max_resolution, args.border_size)
         elif args.content_path:
             modify_image(args.content_path, args.style_path,
-                         args.iterations, args.max_resolution)
+                         args.iterations, args.max_resolution, args.border_size)
         else:
             print("Please specify either content image or content directory")
     else:
