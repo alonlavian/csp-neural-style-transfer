@@ -2,7 +2,7 @@
 Module that adds a magnified border to the image
 """
 import PIL
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np
 
 def get_magnified_img(image, resize_by=20):
@@ -15,7 +15,8 @@ def get_magnified_img(image, resize_by=20):
         PIL image object with larger image for the border
     """
     resized_image = image.resize(tuple(map(lambda dim: dim+resize_by*2, image.size)))
-    return resized_image
+    blurred_image = resized_image.filter(ImageFilter.GaussianBlur(10))
+    return blurred_image
 
 
 def make_border(image, border_size): 
@@ -33,7 +34,7 @@ def make_border(image, border_size):
     return border_img
     
 def main():
-    IMAGE_PATH = "content_images/Mona_Lisa.jpg"
+    IMAGE_PATH = "content_images/modified_Tuebingen_Neckarfront.jpg"
     img = PIL.Image.open(IMAGE_PATH)
     new_img = make_border(img, 75)
     new_img.save("test.jpg")

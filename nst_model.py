@@ -46,6 +46,7 @@ class ContentAndStyleImage():
         img = Image.open(path_to_img)
         long = max(img.size)
         scale = max_dimension / long
+        # Resizing the image and converting it to RGB so all image types are usable
         img = img.convert("RGB")
         img = img.resize(
             (round(img.size[0] * scale), round(img.size[1] * scale)), Image.ANTIALIAS)
@@ -221,8 +222,7 @@ class NSTModel():
         style_weight, content_weight = loss_weights
 
         # Feed our init image through our model. This will give us the content and
-        # style representations at our desired layers. Since we're using eager
-        # our model is callable just like any other function!
+        # style representations at our desired layers.
         model_outputs = self.model(init_image)
 
         style_output_features = model_outputs[:self.num_style_layers]
@@ -243,6 +243,7 @@ class NSTModel():
         for target_content, comb_content in zip(content_features, content_output_features):
             total_content_score += average_content_weight * \
                 self._get_content_loss(comb_content[0], target_content)
+        #Get Variation loss of the image
         total_ta_score = self._get_total_variational_loss(
             init_image) * ta_weight
         total_style_score *= style_weight
@@ -285,11 +286,10 @@ class NSTModel():
             Best optimized image and best loss
         """
         # trainable to false.
-        # We don't need to (or want to) train any layers of our model, so we set their
         for layer in self.model.layers:
             layer.trainable = False
 
-        # Get the style and content feature representations (from our specified intermediate layers)
+        # Get the style and content feature representations
         style_features, content_features = self._get_feature_representations(
             content_and_style_class)
         gram_style_features = [self._get_gram_matrix(style_feature)
@@ -352,8 +352,6 @@ class NSTModel():
             fig, ax = plt.subplots(num_iterations // 100, 1)
             for i, img in enumerate(imgs):
                 ax[i].imshow(img)
-                # ax[i].xticks([])
-                # ax[i].yticks([])
             fig.savefig("image")
             fig_best, ax_best = plt.subplots(1, 1)
             ax_best.imshow(best_img)
