@@ -8,7 +8,7 @@ import sys
 import PIL
 import tensorflow as tf
 import nst_model as nst
-
+import border
 
 def run_nst(content_path, style_path, model, num_iterations, max_resolution=512):
     """
@@ -27,7 +27,7 @@ def run_nst(content_path, style_path, model, num_iterations, max_resolution=512)
     return best_img
 
 
-def modify_directory(directory, style_path, num_iterations):
+def modify_directory(directory, style_path, num_iterations, border_size):
     """
     Function that runs run_nst on all images on a directory
     Arguments:
@@ -57,6 +57,7 @@ def modify_directory(directory, style_path, num_iterations):
                                   style_path, model, num_iterations)
                 _, tail = os.path.split(file)
                 new_img = PIL.Image.fromarray(new_img)
+                new_img = border.make_border(new_img, border_size)
                 new_img_filename = os.path.join(
                     new_dir, f"modified_{tail}")  # f"{tail}_modified"
                 new_img.save(new_img_filename)
@@ -110,6 +111,7 @@ if __name__ == "__main__":
         "max_resolution", 512, "Maximum Resolution")
     tf.app.flags.DEFINE_integer(
         "iterations", 1000, "Number of iterations to run optimizations for")
+    tf.app.flags.DEFINE_integer("border_size", 75, "border size to add, 0 for none")
     tf.app.flags.DEFINE_bool("all", False, "")
     args = tf.app.flags.FLAGS
     # parser.add_argument("--directory", "-d", type=str)
@@ -121,7 +123,7 @@ if __name__ == "__main__":
     if args.style_path:
         if args.content_directory:
             modify_directory(args.content_directory,
-                             args.style_path, args.iterations, args.max_resolution)
+                             args.style_path, args.iterations, args.max_resolution, args.border_size)
         elif args.content_path:
             modify_image(args.content_path, args.style_path,
                          args.iterations, args.max_resolution)
