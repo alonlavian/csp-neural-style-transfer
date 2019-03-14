@@ -8,9 +8,9 @@ import sys
 import PIL
 import tensorflow as tf
 import nst_model as nst
-import border
+import add_border
 
-def run_nst(content_path, style_path, model, num_iterations, max_resolution=512):
+def run_nst(content_path, style_path, model, num_iterations, max_resolution=512, border_size=75):
     """
     Function that runs nst
     Arguments:
@@ -24,6 +24,7 @@ def run_nst(content_path, style_path, model, num_iterations, max_resolution=512)
     images = nst.ContentAndStyleImage(content_path, style_path, max_resolution)
     best_img, _ = model.run_style_transfer(
         images, num_iterations=num_iterations)
+    best_img_border = add_border.make_border(best_img, border_size)
     return best_img
 
 
@@ -54,10 +55,9 @@ def modify_directory(directory, style_path, num_iterations, border_size):
             # ipdb.set_trace()
             try:
                 new_img = run_nst(f"{directory}/{file}",
-                                  style_path, model, num_iterations)
+                                  style_path, model, num_iterations, border_size=border_size)
                 _, tail = os.path.split(file)
                 new_img = PIL.Image.fromarray(new_img)
-                new_img = border.make_border(new_img, border_size)
                 new_img_filename = os.path.join(
                     new_dir, f"modified_{tail}")  # f"{tail}_modified"
                 new_img.save(new_img_filename)
@@ -68,7 +68,7 @@ def modify_directory(directory, style_path, num_iterations, border_size):
                 print("Please enter valid file paths")
 
 
-def modify_image(content_path, style_path, num_iterations, max_resolution):
+def modify_image(content_path, style_path, num_iterations, max_resolution, border_size):
     """
     Function that runs run_nst on one image
     Arguments:
@@ -80,8 +80,9 @@ def modify_image(content_path, style_path, num_iterations, max_resolution):
     """
     model = nst.NSTModel()
     try:
-        new_img = run_nst(f"{content_path}",
-                          style_path, model, num_iterations, max_resolution=max_resolution)
+        new_img = run_nst(content_path,
+                          style_path, model, num_iterations, \ 
+                          max_resolution=max_resolution, border_size=border_size)
         new_img = PIL.Image.fromarray(new_img)
         head, tail = os.path.split(content_path)
         new_img_filename = f"./{head}/modified_{tail}"  # f"{tail}_modified"
