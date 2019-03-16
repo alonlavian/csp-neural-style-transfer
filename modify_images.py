@@ -7,8 +7,13 @@ import os.path
 import sys
 import PIL
 import tensorflow as tf
+from collections import namedtuple
+from PyInquirer import prompt
+
 import nst_model as nst
 import add_border
+import cli
+
 
 def run_nst(content_path, style_path, model, num_iterations, max_resolution=512, border_size=75):
     """
@@ -24,11 +29,12 @@ def run_nst(content_path, style_path, model, num_iterations, max_resolution=512,
     images = nst.ContentAndStyleImage(content_path, style_path, max_resolution)
     best_img, _ = model.run_style_transfer(
         images, num_iterations=num_iterations)
-    best_img_border = add_border.make_border(best_img, border_size)
+    best_img_border = add_border.make_border(
+        PIL.Image.fromarray(best_img), border_size)
     return best_img
 
 
-def modify_directory(directory, style_path, num_iterations, border_size):
+def modify_directory(directory, style_path, num_iterations, max_resolution, border_size):
     """
     Function that runs run_nst on all images on a directory
     Arguments:
@@ -55,7 +61,7 @@ def modify_directory(directory, style_path, num_iterations, border_size):
             # ipdb.set_trace()
             try:
                 new_img = run_nst(f"{directory}/{file}",
-                                  style_path, model, num_iterations, border_size=border_size)
+                                  style_path, model, num_iterations, border_size=border_size, max_resolution=max_resolution)
                 _, tail = os.path.split(file)
                 new_img = PIL.Image.fromarray(new_img)
                 new_img_filename = os.path.join(
@@ -81,7 +87,7 @@ def modify_image(content_path, style_path, num_iterations, max_resolution, borde
     model = nst.NSTModel()
     try:
         new_img = run_nst(content_path,
-                          style_path, model, num_iterations, \
+                          style_path, model, num_iterations,
                           max_resolution=max_resolution, border_size=border_size)
         new_img = PIL.Image.fromarray(new_img)
         head, tail = os.path.split(content_path)
@@ -112,7 +118,9 @@ if __name__ == "__main__":
         "max_resolution", 512, "Maximum Resolution")
     tf.app.flags.DEFINE_integer(
         "iterations", 1000, "Number of iterations to run optimizations for")
-    tf.app.flags.DEFINE_integer("border_size", 75, "border size to add, 0 for none")
+    tf.app.flags.DEFINE_integer(
+        "border_size", 75, "border size to add, 0 for none")
+    tf.app.flags.DEFINE_bool("interactive", False, "")
     tf.app.flags.DEFINE_bool("all", False, "")
     args = tf.app.flags.FLAGS
     # parser.add_argument("--directory", "-d", type=str)
@@ -121,7 +129,18 @@ if __name__ == "__main__":
     # args = parser.parse_args()
     if args.all:
         run_all()
-    if args.style_path:
+    elif args.interactive:
+        answer = prompt(**cli.return_cli())
+        named_answers = namedtuple(
+            "Arguments", answer.keys())(*answer.values())
+        if named_answers.image_or_directory == "directory":
+            modify_directory(named_answers.content_directory,
+                             named_answers.style_path, named_answers.iterations, named_answers.max_resolution, named_answers.border_size)
+        elif named_answers.image_or_directory == "image":
+            modify_image(named_answers.content_image,
+                         named_answers.style_path, named_answers.iterations, named_answers.max_resolution, named_answers.border_size)
+
+    elif args.style_path:
         if args.content_directory:
             modify_directory(args.content_directory,
                              args.style_path, args.iterations, args.max_resolution, args.border_size)

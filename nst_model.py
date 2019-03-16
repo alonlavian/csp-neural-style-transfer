@@ -8,6 +8,7 @@ from tensorflow.python.keras import models
 from tensorflow.python.keras.preprocessing import image as keras_image_process
 from tqdm import tqdm
 from PIL import Image
+from collections import namedtuple
 import numpy as np
 import tensorflow.contrib.eager as tfe
 import matplotlib as mpl
@@ -243,7 +244,7 @@ class NSTModel():
         for target_content, comb_content in zip(content_features, content_output_features):
             total_content_score += average_content_weight * \
                 self._get_content_loss(comb_content[0], target_content)
-        #Get Variation loss of the image
+        # Get Variation loss of the image
         total_ta_score = self._get_total_variational_loss(
             init_image) * ta_weight
         total_style_score *= style_weight
