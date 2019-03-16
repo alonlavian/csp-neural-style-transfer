@@ -1,9 +1,17 @@
+"""
+Module to package cli functionality of code
+"""
+
 import os
-from PyInquirer import style_from_dict, Token, prompt
+from PyInquirer import style_from_dict, Token
 from PyInquirer import Validator, ValidationError
 
 
 class NumberValidator(Validator):
+    """
+    Class for custom validator to validate numbers
+    """
+
     def validate(self, document):
         try:
             int(document.text)
@@ -14,6 +22,10 @@ class NumberValidator(Validator):
 
 
 class DirectoryValidator(Validator):
+    """
+    Class for custom validator to validate directories
+    """
+
     def validate(self, document):
         if not os.path.isdir(document.text):
             raise ValidationError(
@@ -22,6 +34,10 @@ class DirectoryValidator(Validator):
 
 
 class FileValidator(Validator):
+    """
+    Class for custom validator to validate files
+    """
+
     def validate(self, document):
         if not os.path.isfile(document.text):
             raise ValidationError(
@@ -30,6 +46,11 @@ class FileValidator(Validator):
 
 
 def return_cli():
+    """
+    Wrapper function that returns questions and style dict for cli
+    Returns:
+        A Dict containing questions and style
+    """
     style = style_from_dict({
         Token.QuestionMark: '#E91E63 bold',
         Token.Selected: '#673AB7 bold',
