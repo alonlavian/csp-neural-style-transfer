@@ -204,7 +204,7 @@ class NSTModel():
         return style_features, content_features
 
     def _compute_loss(self, loss_weights, init_image, gram_style_features,
-                      content_features, ta_weight=1):
+                      content_features):
         """
         Computes the total loss.
         Arguments:
@@ -218,7 +218,7 @@ class NSTModel():
         Returns:
           returns the total loss, style loss, content loss, and variational loss
         """
-        style_weight, content_weight = loss_weights
+        style_weight, content_weight, ta_weight = loss_weights
 
         # Feed our init image through our model. This will give us the content and
         # style representations at our desired layers.
@@ -305,13 +305,12 @@ class NSTModel():
         best_loss, best_img = float('inf'), None
 
         # Create a nice config
-        loss_weights = (style_weight, content_weight)
+        loss_weights = (style_weight, content_weight, ta_weight)
         config = {
             'loss_weights': loss_weights,
             'init_image': init_image,
             'gram_style_features': gram_style_features,
             'content_features': content_features,
-            "ta_weight": ta_weight,
         }
 
         # For displaying
