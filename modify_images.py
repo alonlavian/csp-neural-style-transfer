@@ -24,7 +24,12 @@ import add_border
 import cli
 
 
-def run_nst(content_path, style_path, model, num_iterations, max_resolution=512, border_size=75):
+def run_nst(content_path,
+            style_path,
+            model,
+            num_iterations,
+            max_resolution=512,
+            border_size=75):
     """
     Function that runs nst
     Arguments:

@@ -233,13 +233,15 @@ class NSTModel():
         # Accumulate style losses from all layers
         # Here, we equally weight each contribution of each loss layer
         averge_style_weight = 1.0 / float(self.num_style_layers)
-        for target_style, comb_style in zip(gram_style_features, style_output_features):
+        for target_style, comb_style in zip(gram_style_features,
+                                            style_output_features):
             total_style_score += averge_style_weight * \
                 self._get_style_loss(comb_style[0], target_style)
 
         # Accumulate content losses from all layers
         average_content_weight = 1.0 / float(self.num_content_layers)
-        for target_content, comb_content in zip(content_features, content_output_features):
+        for target_content, comb_content in zip(content_features,
+                                                content_output_features):
             total_content_score += average_content_weight * \
                 self._get_content_loss(comb_content[0], target_content)
         # Get Variation loss of the image
@@ -327,7 +329,8 @@ class NSTModel():
             content_and_style_class.path_to_content_img)
 
         print(
-            f"Initializing Transfer of Style from image: {style_tail} upon image: {content_tail}"
+            f"Initializing Transfer of Style from image: {style_tail} upon \
+            image: {content_tail}"
         )
         for i in tqdm(range(num_iterations)):
             grads, all_loss = self._compute_gradients(config)
