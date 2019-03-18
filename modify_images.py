@@ -174,4 +174,4 @@ if __name__ == "__main__":
         else:
             print("Please specify style path")
     except AttributeError:
-        print("Sorry, something went wrong. Please try again.")
+        print("Cleaning up...")
