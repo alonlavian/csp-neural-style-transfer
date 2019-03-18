@@ -1,9 +1,12 @@
 """
 Module that adds a magnified border to the image
+
+Usage:
+    --image: Image to apply border on
 """
+import argparse
 import PIL
-from PIL import Image, ImageFilter
-import numpy as np
+from PIL import ImageFilter
 
 
 def get_magnified_img(image, resize_by=20):
@@ -36,12 +39,17 @@ def make_border(image, border_size):
     return border_img
 
 
-def main():
-    IMAGE_PATH = "content_images/modified_Tuebingen_Neckarfront.jpg"
-    img = PIL.Image.open(IMAGE_PATH)
+def main(image_path):
+    """
+    Function for command line execution
+    """
+    img = PIL.Image.open(image_path)
     new_img = make_border(img, 75).convert("RGBA")
     new_img.save("test.png")
 
 
 if __name__ == '__main__':
-    main()
+    PARSER = argparse.ArgumentParser()
+    PARSER.add_argument("--image", "-i")
+    ARGS = PARSER.parse_args()
+    main(ARGS.image)

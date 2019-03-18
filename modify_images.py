@@ -1,13 +1,22 @@
 """
 Module containing functions to apply nst on images in a directory
+
+Usage:
+    --interactive: Launches the interactive CLI for modifying images
+    --max_resolution: The resolution to scale both images to, Default 512
+    --border_size: The border to apply on the image in pixels
+    --content_path: The path to the content image
+    --content_directory: The path to the directory of the content images
+    --iterations: The number of iterations for which to run the style transfer
+    --style_path: The path to the style image
 """
 
-import argparse
 import os.path
 import sys
+from collections import namedtuple
 import PIL
 import tensorflow as tf
-from collections import namedtuple
+import numpy as np
 from PyInquirer import prompt
 
 import nst_model as nst
@@ -29,9 +38,9 @@ def run_nst(content_path, style_path, model, num_iterations, max_resolution=512,
     images = nst.ContentAndStyleImage(content_path, style_path, max_resolution)
     best_img, _ = model.run_style_transfer(
         images, num_iterations=num_iterations)
-    best_img_border = add_border.make_border(
-        PIL.Image.fromarray(best_img), border_size)
-    return best_img
+    best_img_border = np.array(add_border.make_border(
+        PIL.Image.fromarray(best_img), border_size))
+    return best_img_border
 
 
 def modify_directory(directory, style_path, num_iterations, max_resolution, border_size):
@@ -61,7 +70,9 @@ def modify_directory(directory, style_path, num_iterations, max_resolution, bord
             # ipdb.set_trace()
             try:
                 new_img = run_nst(f"{directory}/{file}",
-                                  style_path, model, num_iterations, border_size=border_size, max_resolution=max_resolution)
+                                  style_path, model, num_iterations,
+                                  border_size=border_size,
+                                  max_resolution=max_resolution)
                 _, tail = os.path.split(file)
                 new_img = PIL.Image.fromarray(new_img)
                 new_img_filename = os.path.join(
@@ -100,13 +111,15 @@ def modify_image(content_path, style_path, num_iterations, max_resolution, borde
         print("Please enter valid file paths")
 
 
-def run_all():
-    for i in os.listdir("./style_images_2"):
-        modify_directory("./content_images", f"./style_images_2/{i}", 1000)
+# def run_all():
+#     """
+#     Runs style transfer for all content images and style images
+#     """
+#     for i in os.listdir("./style_images_2"):
+#         modify_directory("./content_images", f"./style_images_2/{i}", 1000)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
     tf.app.flags.DEFINE_string(
         "content_directory", None, "Directory of images to apply transformation")
     tf.app.flags.DEFINE_string(
@@ -121,33 +134,44 @@ if __name__ == "__main__":
     tf.app.flags.DEFINE_integer(
         "border_size", 75, "border size to add, 0 for none")
     tf.app.flags.DEFINE_bool("interactive", False, "")
-    tf.app.flags.DEFINE_bool("all", False, "")
-    args = tf.app.flags.FLAGS
-    # parser.add_argument("--directory", "-d", type=str)
-    # parser.add_argument("--style_path", "-s", type=str)
-    # parser.add_argument("--iterations", "-i", type=int, default=1000)
-    # args = parser.parse_args()
-    if args.all:
-        run_all()
-    elif args.interactive:
-        answer = prompt(**cli.return_cli())
-        named_answers = namedtuple(
-            "Arguments", answer.keys())(*answer.values())
-        if named_answers.image_or_directory == "directory":
-            modify_directory(named_answers.content_directory,
-                             named_answers.style_path, named_answers.iterations, named_answers.max_resolution, named_answers.border_size)
-        elif named_answers.image_or_directory == "image":
-            modify_image(named_answers.content_image,
-                         named_answers.style_path, named_answers.iterations, named_answers.max_resolution, named_answers.border_size)
+    # tf.app.flags.DEFINE_bool("all", False, "")
+    ARGS = tf.app.flags.FLAGS
+    try:
+        # if ARGS.all:
+        #     run_all()
+        if ARGS.interactive:
+            ANSWER = prompt(**cli.return_cli())
+            NAMED_ANSWERS = namedtuple(
+                "Arguments", ANSWER.keys())(*ANSWER.values())
+            if NAMED_ANSWERS.image_or_directory == "directory":
+                modify_directory(NAMED_ANSWERS.content_directory,
+                                 NAMED_ANSWERS.style_path,
+                                 NAMED_ANSWERS.iterations,
+                                 NAMED_ANSWERS.max_resolution,
+                                 NAMED_ANSWERS.border_size)
+            elif NAMED_ANSWERS.image_or_directory == "image":
+                modify_image(NAMED_ANSWERS.content_path,
+                             NAMED_ANSWERS.style_path,
+                             NAMED_ANSWERS.iterations,
+                             NAMED_ANSWERS.max_resolution,
+                             NAMED_ANSWERS.border_size)
 
-    elif args.style_path:
-        if args.content_directory:
-            modify_directory(args.content_directory,
-                             args.style_path, args.iterations, args.max_resolution, args.border_size)
-        elif args.content_path:
-            modify_image(args.content_path, args.style_path,
-                         args.iterations, args.max_resolution, args.border_size)
+        elif ARGS.style_path:
+            if ARGS.content_directory:
+                modify_directory(ARGS.content_directory,
+                                 ARGS.style_path,
+                                 ARGS.iterations,
+                                 ARGS.max_resolution,
+                                 ARGS.border_size)
+            elif ARGS.content_path:
+                modify_image(ARGS.content_path,
+                             ARGS.style_path,
+                             ARGS.iterations,
+                             ARGS.max_resolution,
+                             ARGS.border_size)
+            else:
+                print("Please specify either content image or content directory")
         else:
-            print("Please specify either content image or content directory")
-    else:
-        print("Please specify style path")
+            print("Please specify style path")
+    except AttributeError:
+        print("Sorry, something went wrong. Please try again.")

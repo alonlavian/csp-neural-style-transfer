@@ -52,12 +52,22 @@ def return_cli():
         A Dict containing questions and style
     """
     style = style_from_dict({
-        Token.QuestionMark: '#E91E63 bold',
-        Token.Selected: '#673AB7 bold',
+        Token.QuestionMark: '#45ed18 bold',
+        Token.Selected: '#673ab8 bold',
         Token.Instruction: '',  # default
-        Token.Answer: '#2196f3 bold',
+        Token.Answer: '#2177f4 bold',
         Token.Question: '',
     })
+    # style = style_from_dict({
+    #     Token.Separator: '#6C6C6C',
+    #     Token.QuestionMark: '#FF9D00 bold',
+    #     # Token.Selected: '',  # default
+    #     Token.Selected: '#5F819D',
+    #     Token.Pointer: '#FF9D00 bold',
+    #     Token.Instruction: '',  # default
+    #     Token.Answer: '#5F819D bold',
+    #     Token.Question: '',
+    # })
     questions = [
         {
             'type': 'list',
@@ -87,12 +97,11 @@ def return_cli():
             "validate": FileValidator,
         },
         {
-            'type': 'input',
+            'type': 'list',
             'name': 'iterations',
-            'message': 'How many iterations do you want to run?',
-            "default": "1000",
-            'validate': NumberValidator,
-            'filter': lambda val: int(val),
+            'message': 'How finely do you want the style to be transfered?',
+            "choices": ["High", "Medium", "Low"],
+            'filter': lambda val: 1000 if val == "High" else 500 if val == "Medium" else 100,
         },
         {
             'type': 'input',
@@ -100,15 +109,14 @@ def return_cli():
             'message': 'How many pixels wide do you want the border?',
             "default": "75",
             'validate': NumberValidator,
-            'filter': lambda val: int(val),
+            'filter': int,
         },
         {
-            'type': 'input',
+            'type': 'list',
             'name': 'max_resolution',
             'message': 'What is the resolution you want to convert the images to?',
-            "default": "512",
-            'validate': NumberValidator,
-            'filter': lambda val: int(val) if int(val) < 1500 else 1500,
+            "choices": ["High", "Medium", "Low"],
+            'filter': lambda val: 1500 if val == "High" else 512 if val == "Medium" else 256,
         },
     ]
     return {"questions": questions, "style": style}

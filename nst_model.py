@@ -4,13 +4,11 @@ Module Containing all classes and functions to run Neural Style Transfer
 import os
 import time
 import tensorflow as tf
-from tensorflow.python.keras import models
-from tensorflow.python.keras.preprocessing import image as keras_image_process
+from tensorflow.keras import models
+from tensorflow.keras.preprocessing import image as keras_image_process
 from tqdm import tqdm
 from PIL import Image
-from collections import namedtuple
 import numpy as np
-import tensorflow.contrib.eager as tfe
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 mpl.rcParams['axes.grid'] = False
@@ -165,7 +163,7 @@ class NSTModel():
         """
         # height, width, num filters of each layer
         # We scale the loss at a given layer by the size of the feature map and the number of filters
-        height, width, channels = style.get_shape().as_list()
+        # height, width, channels = style.get_shape().as_list()
         gram_style = self._get_gram_matrix(style)
 
         # / (4. * (channels ** 2) * (width * height) ** 2)
@@ -334,7 +332,7 @@ class NSTModel():
         )
         for i in tqdm(range(num_iterations)):
             grads, all_loss = self._compute_gradients(config)
-            loss, style_score, content_score = all_loss
+            loss, _, _ = all_loss
             opt.apply_gradients([(grads, init_image)])
             clipped = tf.clip_by_value(init_image, min_vals, max_vals)
             init_image.assign(clipped)
@@ -350,9 +348,9 @@ class NSTModel():
             time.time() - global_start))
         if save:
             plt.figure(figsize=(14, 4))
-            fig, ax = plt.subplots(num_iterations // 100, 1)
+            fig, axes = plt.subplots(num_iterations // 100, 1)
             for i, img in enumerate(imgs):
-                ax[i].imshow(img)
+                axes[i].imshow(img)
             fig.savefig("image")
             fig_best, ax_best = plt.subplots(1, 1)
             ax_best.imshow(best_img)
