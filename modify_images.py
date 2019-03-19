@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Module containing functions to apply nst on images in a directory
 
@@ -138,7 +139,7 @@ if __name__ == "__main__":
         "iterations", 1000, "Number of iterations to run optimizations for")
     tf.app.flags.DEFINE_integer(
         "border_size", 75, "border size to add, 0 for none")
-    tf.app.flags.DEFINE_bool("interactive", False, "")
+    tf.app.flags.DEFINE_bool("interactive", False, "flag to enable interactive prompt")
     # tf.app.flags.DEFINE_bool("all", False, "")
     ARGS = tf.app.flags.FLAGS
     try:

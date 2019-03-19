@@ -3,6 +3,7 @@ Module that adds a magnified border to the image
 
 Usage:
     --image: Image to apply border on
+    --border_size: Size of border in pixels
 """
 import argparse
 import PIL
@@ -39,17 +40,22 @@ def make_border(image, border_size):
     return border_img
 
 
-def main(image_path):
+def main(image_path, border_size):
     """
     Function for command line execution
+    Arguments:
+        image: PIL image object
+        border_size: integer (specifies width in pixels of border)
     """
     img = Image.open(image_path)
-    new_img = make_border(img, 75).convert("RGBA")
+    new_img = make_border(img, border_size).convert("RGBA")
     new_img.save("test.png")
 
 
 if __name__ == '__main__':
     PARSER = argparse.ArgumentParser()
     PARSER.add_argument("--image", "-i")
+    PARSER.add_argument("--border_size", "-b")
+
     ARGS = PARSER.parse_args()
-    main(ARGS.image)
+    main(ARGS.image, ARGS.border_size)
