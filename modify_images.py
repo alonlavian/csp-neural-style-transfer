@@ -144,22 +144,52 @@ if __name__ == "__main__":
     try:
         # if ARGS.all:
         #     run_all()
+        if os.getcwd() != "/home/ubuntu/workspace/csp-python-source/csp-neural-style-transfer":
+            sys.exit("Please run modify_images.py from the directory that modify_images.py is located in")
         if ARGS.interactive:
             ANSWER = prompt(**cli.return_cli())
             NAMED_ANSWERS = namedtuple(
                 "Arguments", ANSWER.keys())(*ANSWER.values())
-            if NAMED_ANSWERS.image_or_directory == "directory":
-                modify_directory(NAMED_ANSWERS.content_directory,
+            if NAMED_ANSWERS.style_path != "other":
+                if NAMED_ANSWERS.image_or_directory == "directory":
+                    if NAMED_ANSWERS.content_directory != "other":
+                        modify_directory(NAMED_ANSWERS.content_directory,
+                                         NAMED_ANSWERS.style_path,
+                                         NAMED_ANSWERS.iterations,
+                                         NAMED_ANSWERS.max_resolution,
+                                         NAMED_ANSWERS.border_size)
+                    else:
+                        modify_directory(NAMED_ANSWERS.content_directory_other,
+                                         NAMED_ANSWERS.style_path,
+                                         NAMED_ANSWERS.iterations,
+                                         NAMED_ANSWERS.max_resolution,
+                                         NAMED_ANSWERS.border_size)
+                elif NAMED_ANSWERS.image_or_directory == "image":
+                    modify_image(NAMED_ANSWERS.content_path,
                                  NAMED_ANSWERS.style_path,
                                  NAMED_ANSWERS.iterations,
                                  NAMED_ANSWERS.max_resolution,
                                  NAMED_ANSWERS.border_size)
-            elif NAMED_ANSWERS.image_or_directory == "image":
-                modify_image(NAMED_ANSWERS.content_path,
-                             NAMED_ANSWERS.style_path,
-                             NAMED_ANSWERS.iterations,
-                             NAMED_ANSWERS.max_resolution,
-                             NAMED_ANSWERS.border_size)
+            else:
+                if NAMED_ANSWERS.image_or_directory == "directory":
+                    if NAMED_ANSWERS.content_directory != "other":
+                        modify_directory(NAMED_ANSWERS.content_directory,
+                                         NAMED_ANSWERS.style_path_other,
+                                         NAMED_ANSWERS.iterations,
+                                         NAMED_ANSWERS.max_resolution,
+                                         NAMED_ANSWERS.border_size)
+                    else:
+                        modify_directory(NAMED_ANSWERS.content_directory_other,
+                                         NAMED_ANSWERS.style_path_other,
+                                         NAMED_ANSWERS.iterations,
+                                         NAMED_ANSWERS.max_resolution,
+                                         NAMED_ANSWERS.border_size)
+                elif NAMED_ANSWERS.image_or_directory == "image":
+                    modify_image(NAMED_ANSWERS.content_path,
+                                 NAMED_ANSWERS.style_path_other,
+                                 NAMED_ANSWERS.iterations,
+                                 NAMED_ANSWERS.max_resolution,
+                                 NAMED_ANSWERS.border_size)
 
         elif ARGS.style_path:
             if ARGS.content_directory:

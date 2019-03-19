@@ -6,7 +6,7 @@ Usage:
 """
 import argparse
 import PIL
-from PIL import ImageFilter
+from PIL import Image, ImageFilter
 
 
 def get_magnified_img(image, resize_by=20):
@@ -43,7 +43,7 @@ def main(image_path):
     """
     Function for command line execution
     """
-    img = PIL.Image.open(image_path)
+    img = Image.open(image_path)
     new_img = make_border(img, 75).convert("RGBA")
     new_img.save("test.png")
 
