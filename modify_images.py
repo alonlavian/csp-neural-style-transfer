@@ -24,6 +24,8 @@ import nst_model as nst
 import add_border
 import cli
 
+C9_HOME_DIRECTORY = "/home/ubuntu/workspace/csp-python-source/csp-neural-style-transfer"
+WINDOWS_HOME_DIRECTORY = "D:\\csp-neural-style-transfer"
 
 def run_nst(content_path,
             style_path,
@@ -145,7 +147,7 @@ if __name__ == "__main__":
     try:
         # if ARGS.all:
         #     run_all()
-        if os.getcwd() != "/home/ubuntu/workspace/csp-python-source/csp-neural-style-transfer":
+        if os.getcwd() not in [C9_HOME_DIRECTORY, WINDOWS_HOME_DIRECTORY]:
             sys.exit("Please run modify_images.py from the directory that modify_images.py is located in")
         if ARGS.interactive:
             ANSWER = prompt(**cli.return_cli())
