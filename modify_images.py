@@ -157,49 +157,12 @@ if __name__ == "__main__":
             print(__doc__)
         elif ARGS.interactive:
             ANSWER = prompt(**cli.return_cli())
-            NAMED_ANSWERS = namedtuple(
-                "Arguments", ANSWER.keys())(*ANSWER.values())
-            if NAMED_ANSWERS.style_path != "other":
-                if NAMED_ANSWERS.image_or_directory == "directory":
-                    if NAMED_ANSWERS.content_directory != "other":
-                        modify_directory(NAMED_ANSWERS.content_directory,
-                                         NAMED_ANSWERS.style_path,
-                                         NAMED_ANSWERS.iterations,
-                                         NAMED_ANSWERS.max_resolution,
-                                         NAMED_ANSWERS.border_size)
-                    else:
-                        modify_directory(NAMED_ANSWERS.content_directory_other,
-                                         NAMED_ANSWERS.style_path,
-                                         NAMED_ANSWERS.iterations,
-                                         NAMED_ANSWERS.max_resolution,
-                                         NAMED_ANSWERS.border_size)
-                elif NAMED_ANSWERS.image_or_directory == "image":
-                    modify_image(NAMED_ANSWERS.content_path,
-                                 NAMED_ANSWERS.style_path,
-                                 NAMED_ANSWERS.iterations,
-                                 NAMED_ANSWERS.max_resolution,
-                                 NAMED_ANSWERS.border_size)
-            else:
-                if NAMED_ANSWERS.image_or_directory == "directory":
-                    if NAMED_ANSWERS.content_directory != "other":
-                        modify_directory(NAMED_ANSWERS.content_directory,
-                                         NAMED_ANSWERS.style_path_other,
-                                         NAMED_ANSWERS.iterations,
-                                         NAMED_ANSWERS.max_resolution,
-                                         NAMED_ANSWERS.border_size)
-                    else:
-                        modify_directory(NAMED_ANSWERS.content_directory_other,
-                                         NAMED_ANSWERS.style_path_other,
-                                         NAMED_ANSWERS.iterations,
-                                         NAMED_ANSWERS.max_resolution,
-                                         NAMED_ANSWERS.border_size)
-                elif NAMED_ANSWERS.image_or_directory == "image":
-                    modify_image(NAMED_ANSWERS.content_path,
-                                 NAMED_ANSWERS.style_path_other,
-                                 NAMED_ANSWERS.iterations,
-                                 NAMED_ANSWERS.max_resolution,
-                                 NAMED_ANSWERS.border_size)
-
+            NAMED_ANSWERS = namedtuple("Arguments", ANSWER.keys())(*ANSWER.values())
+            modify_directory(NAMED_ANSWERS.content_directory,
+                                             NAMED_ANSWERS.style_path,
+                                             NAMED_ANSWERS.iterations,
+                                             NAMED_ANSWERS.max_resolution,
+                                             NAMED_ANSWERS.border_size)
         elif ARGS.style_path:
             if ARGS.content_directory:
                 modify_directory(ARGS.content_directory,

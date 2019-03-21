@@ -28,7 +28,7 @@ class DirectoryValidator(Validator):
     """
 
     def validate(self, document):
-        if not os.path.isdir(document.text):
+        if not os.path.isdir(document.text) or document.text == "Other":
             raise ValidationError(
                 message="Please enter a valid dircetory path",
                 cursor_position=len(document.text))
@@ -40,7 +40,7 @@ class FileValidator(Validator):
     """
 
     def validate(self, document):
-        if not os.path.isfile(document.text):
+        if not os.path.isfile(document.text) or document.text == "Other":
             raise ValidationError(
                 message="Please enter a valid file path",
                 cursor_position=len(document.text))
@@ -76,7 +76,7 @@ def return_cli():
         {
             "type": "list",
             "name": "image_or_directory",
-            "message": "Do you want to modify and image or a directory",
+            "message": "Do you want to modify and image or a directory?",
             "choices": ["image", "directory"],
             "filter": lambda val: val.lower(),
         },
@@ -92,15 +92,15 @@ def return_cli():
             "name": "content_directory",
             "message": "Please choose the directory you want to modify, or select other",
             "choices": [file for file in os.listdir(directory) \
-                                if os.path.isdir(file)]+["other"],
+                                if os.path.isdir(file)]+["Other"],
             "when": lambda answers: answers["image_or_directory"] == "directory",
             # "validate": DirectoryValidator,
         },
         {
             "type": "input",
-            "name": "content_directory_other",
+            "name": "content_directory",
             "message": "What is the path to directory of content images?",
-            "when": lambda answers: answers["content_directory"] == "other",
+            "when": lambda answers: answers["content_directory"] == "Other",
             "validate": DirectoryValidator,
         },
         {
@@ -108,22 +108,22 @@ def return_cli():
             "name": "style_path",
             "message": "Please choose the style image you want to modify, or select other",
             "choices": [file for file in os.listdir(f"{directory}/style_images") \
-                            if ".png" in file or ".jpg" in file]+["other"],
+                            if ".png" in file or ".jpg" in file]+["Other"],
             "filter": lambda val: os.path.join(directory, "style_images", val) \
-                                    if val != "other" else val
+                                    if val != "Other" else val
             # "validate": DirectoryValidator,
         },
         {
             "type": "input",
-            "name": "style_path_other",
+            "name": "style_path",
             "message": "What is the path to the style image?",
-            "when": lambda answers: answers["style_path"] == "other",
+            "when": lambda answers: answers["style_path"] == "Other",
             "validate": FileValidator,
         },
         {
             "type": "list",
             "name": "iterations",
-            "message": "How finely do you want the style to be transfered?",
+            "message": "How finely do you want the style to be transferred?",
             "choices": ["High", "Medium", "Low"],
             "filter": lambda val: 1000 if val == "High" else \
                                   500 if val == "Medium" else 100,
@@ -140,7 +140,7 @@ def return_cli():
             "type": "list",
             "name": "max_resolution",
             "message": "What is the resolution you want to convert the images to? " +
-                        "(Please don\'t select high on cloud 9)",
+                        "(Please don\'t select high on Cloud 9)",
             "choices": ["High", "Medium", "Low"],
             "filter": lambda val: 1500 if val == "High" else 512 if val == "Medium" else 256,
         },
