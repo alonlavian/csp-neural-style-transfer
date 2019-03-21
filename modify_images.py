@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!env/Scripts/python
 """
 Module containing functions to apply nst on images in a directory
 
-Usage:
+Arguments:
     --interactive: Launches the interactive CLI for modifying images
     --max_resolution: The resolution to scale both images to, Default 512
     --border_size: The border to apply on the image in pixels
@@ -10,6 +10,10 @@ Usage:
     --content_directory: The path to the directory of the content images
     --iterations: The number of iterations for which to run the style transfer
     --style_path: The path to the style image
+    --help: Displays help message
+Usage:
+    python modify_images.py --interactive
+    python modify_images.py --style_path style_images/Udnie.jpg --content_path content_images/Mr_Brown.jpg
 """
 
 import os.path
@@ -142,14 +146,16 @@ if __name__ == "__main__":
     tf.app.flags.DEFINE_integer(
         "border_size", 75, "border size to add, 0 for none")
     tf.app.flags.DEFINE_bool("interactive", False, "flag to enable interactive prompt")
-    # tf.app.flags.DEFINE_bool("all", False, "")
+    tf.app.flags.DEFINE_bool("help", False, "flag to get usage help")
     ARGS = tf.app.flags.FLAGS
     try:
         # if ARGS.all:
         #     run_all()
         if os.getcwd() not in [C9_HOME_DIRECTORY, WINDOWS_HOME_DIRECTORY]:
             sys.exit("Please run modify_images.py from the directory that modify_images.py is located in")
-        if ARGS.interactive:
+        elif ARGS.help:
+            print(__doc__)
+        elif ARGS.interactive:
             ANSWER = prompt(**cli.return_cli())
             NAMED_ANSWERS = namedtuple(
                 "Arguments", ANSWER.keys())(*ANSWER.values())
