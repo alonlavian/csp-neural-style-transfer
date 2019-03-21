@@ -1,4 +1,4 @@
-#!env/Scripts/python
+#!env/bin/python
 """
 Module containing functions to apply nst on images in a directory
 
