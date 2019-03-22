@@ -11,7 +11,6 @@ from PIL import Image
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-mpl.rcParams['axes.grid'] = False
 tf.enable_eager_execution()
 
 
