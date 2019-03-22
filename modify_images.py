@@ -67,8 +67,6 @@ def modify_directory(directory, style_path, iterations, max_resolution, border_s
         None
     """
     model = nst.NSTModel()
-    # obtains content image and all other images in its directory
-    # directory = os.path.dirname(os.path.abspath(content_path))
 
     # new directory to store modified images
     _, style_tail = os.path.split(style_path)
@@ -80,7 +78,6 @@ def modify_directory(directory, style_path, iterations, max_resolution, border_s
     # for every file, modify and place in new directory
     for file in os.listdir(directory):
         if not os.path.isdir(file) and "modified" not in file:
-            # ipdb.set_trace()
             try:
                 new_img = run_nst(f"{directory}/{file}",
                                   style_path, model, iterations,
@@ -115,7 +112,7 @@ def modify_image(content_path, style_path, iterations, max_resolution, border_si
                           max_resolution=max_resolution, border_size=border_size)
         new_img = PIL.Image.fromarray(new_img)
         head, tail = os.path.split(content_path)
-        new_img_filename = f"./{head}/modified_{tail}"  # f"{tail}_modified"
+        new_img_filename = f"./{head}/modified_{tail}"
         new_img.save(new_img_filename)
     except KeyboardInterrupt:
         print("Action Cancelled By User")
