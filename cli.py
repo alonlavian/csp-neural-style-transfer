@@ -53,6 +53,7 @@ def return_cli():
         A Dict containing questions and style
     """
     directory = os.getcwd()
+    # Setting up the style for the CLI
     style = style_from_dict({
         Token.QuestionMark: "#45ed18 bold",
         Token.Selected: "#673ab8 bold",
@@ -60,18 +61,7 @@ def return_cli():
         Token.Answer: "#2177f4 bold",
         Token.Question: "",
     })
-    # style = style_from_dict({
-    #     Token.Separator: "#6C6C6C",
-    #     Token.QuestionMark: "#FF9D00 bold",
-    #     # Token.Selected: "",  # default
-    #     Token.Selected: "#5F819D",
-    #     Token.Pointer: "#FF9D00 bold",
-    #     Token.Instruction: "",  # default
-    #     Token.Answer: "#5F819D bold",
-    #     Token.Question: "",
-    # })
-    # import pdb; pdb.set_trace()
-
+    # Building question config script
     questions = [
         {
             "type": "list",
