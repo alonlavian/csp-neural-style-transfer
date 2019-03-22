@@ -58,4 +58,4 @@ if __name__ == '__main__':
     PARSER.add_argument("--border_size", "-b")
 
     ARGS = PARSER.parse_args()
-    main(ARGS.image, ARGS.border_size)
+    main(ARGS.image, int(ARGS.border_size))

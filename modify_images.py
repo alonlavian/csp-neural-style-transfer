@@ -4,16 +4,17 @@ Module containing functions to apply nst on images in a directory
 
 Arguments:
     --interactive: Launches the interactive CLI for modifying images
-    --max_resolution: The resolution to scale both images to, Default 512
-    --border_size: The border to apply on the image in pixels
+    --max_resolution: The resolution to scale both images to, Default: 512
+    --border_size: The border to apply on the image in pixels, Default: 75
     --content_path: The path to the content image
     --content_directory: The path to the directory of the content images
-    --iterations: The number of iterations for which to run the style transfer
+    --iterations: The number of iterations to run the style transfer, Default: 1000
     --style_path: The path to the style image
     --help: Displays help message
 Usage:
-    python modify_images.py --interactive
-    python modify_images.py --style_path style_images/Udnie.jpg --content_path content_images/Mr_Brown.jpg
+    ./modify_images.py --interactive
+    ./modify_images.py --style_path [IMAGE] --content_path [IMAGE]
+    ./modify_images.py --style_path [IMAGE] --content_directory [DIRECTORY]
 """
 
 import os.path
@@ -28,8 +29,8 @@ import nst_model as nst
 import add_border
 import cli
 
-C9_HOME_DIRECTORY = "/home/ubuntu/workspace/csp-python-source/csp-neural-style-transfer"
-WINDOWS_HOME_DIRECTORY = "D:\\csp-neural-style-transfer"
+C9_HOME_DIR = "/home/ubuntu/workspace/csp-python-source/csp-neural-style-transfer"
+WINDOWS_HOME_DIR = "D:\\csp-neural-style-transfer"
 
 def run_nst(content_path,
             style_path,
@@ -55,13 +56,13 @@ def run_nst(content_path,
     return best_img_border
 
 
-def modify_directory(directory, style_path, num_iterations, max_resolution, border_size):
+def modify_directory(directory, style_path, iterations, max_resolution, border_size):
     """
     Function that runs run_nst on all images on a directory
     Arguments:
         directory: Directory containing image files
         style_path: Path to style image
-        num_iterations: Total number of optimization steps to run
+        iterations: Total number of optimization steps to run
     Returns:
         None
     """
@@ -82,7 +83,7 @@ def modify_directory(directory, style_path, num_iterations, max_resolution, bord
             # ipdb.set_trace()
             try:
                 new_img = run_nst(f"{directory}/{file}",
-                                  style_path, model, num_iterations,
+                                  style_path, model, iterations,
                                   border_size=border_size,
                                   max_resolution=max_resolution)
                 _, tail = os.path.split(file)
@@ -97,20 +98,20 @@ def modify_directory(directory, style_path, num_iterations, max_resolution, bord
                 print("Please enter valid file paths")
 
 
-def modify_image(content_path, style_path, num_iterations, max_resolution, border_size):
+def modify_image(content_path, style_path, iterations, max_resolution, border_size):
     """
     Function that runs run_nst on one image
     Arguments:
         content_path: Path to content image
         style_path: Path to style image
-        num_iterations: Total number of optimization steps to run
+        iterations: Total number of optimization steps to run
     Returns:
         None
     """
     model = nst.NSTModel()
     try:
         new_img = run_nst(content_path,
-                          style_path, model, num_iterations,
+                          style_path, model, iterations,
                           max_resolution=max_resolution, border_size=border_size)
         new_img = PIL.Image.fromarray(new_img)
         head, tail = os.path.split(content_path)
@@ -145,14 +146,14 @@ if __name__ == "__main__":
         "iterations", 1000, "Number of iterations to run optimizations for")
     tf.app.flags.DEFINE_integer(
         "border_size", 75, "border size to add, 0 for none")
-    tf.app.flags.DEFINE_bool("interactive", False, "flag to enable interactive prompt")
+    tf.app.flags.DEFINE_bool("interactive", False, "enable interactive prompt")
     tf.app.flags.DEFINE_bool("help", False, "flag to get usage help")
     ARGS = tf.app.flags.FLAGS
     try:
         # if ARGS.all:
         #     run_all()
-        if os.getcwd() not in [C9_HOME_DIRECTORY, WINDOWS_HOME_DIRECTORY]:
-            sys.exit("Please run modify_images.py from the directory that modify_images.py is located in")
+        if os.getcwd() not in [C9_HOME_DIR, WINDOWS_HOME_DIR]:
+            sys.exit("Please run modify_images.py from the directory it resides in")
         elif ARGS.help:
             print(__doc__)
         elif ARGS.interactive:
@@ -179,6 +180,7 @@ if __name__ == "__main__":
             else:
                 print("Please specify either content image or content directory")
         else:
-            print("Please specify style path")
+            print("Please specify style path or use flag interactive")
+            print(__doc__)
     except AttributeError:
         print("Cleaning up...")

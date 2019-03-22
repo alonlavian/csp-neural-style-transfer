@@ -30,7 +30,7 @@ class DirectoryValidator(Validator):
     def validate(self, document):
         if not os.path.isdir(document.text) or document.text == "Other":
             raise ValidationError(
-                message="Please enter a valid dircetory path",
+                message="Please enter a valid directory path",
                 cursor_position=len(document.text))
 
 
