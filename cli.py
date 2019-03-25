@@ -71,10 +71,21 @@ def return_cli():
             "filter": lambda val: val.lower(),
         },
         {
+            "type": "list",
+            "name": "content_path",
+            "message": "Please choose the style image you want to modify, or select other",
+            "choices": [file for file in os.listdir(f"{directory}/content_images") \
+                            if ".png" in file or ".jpg" in file]+["Other"],
+            "filter": lambda val: os.path.join(directory, "content_images", val) \
+                                    if val != "Other" else val,
+            "when": lambda answers: answers["image_or_directory"] == "image"
+            # "validate": DirectoryValidator,
+        },
+        {
             "type": "input",
             "name": "content_path",
-            "message": "What is the path to the content image?",
-            "when": lambda answers: answers["image_or_directory"] == "image",
+            "message": "What is the path to the style image?",
+            "when": lambda answers: answers.get("content_path", "N/A") == "Other",
             "validate": FileValidator,
         },
         {
@@ -90,7 +101,7 @@ def return_cli():
             "type": "input",
             "name": "content_directory",
             "message": "What is the path to directory of content images?",
-            "when": lambda answers: answers["content_directory"] == "Other",
+            "when": lambda answers: answers.get("content_directory", "N/A") == ["Other"],
             "validate": DirectoryValidator,
         },
         {
