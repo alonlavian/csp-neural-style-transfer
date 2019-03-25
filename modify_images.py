@@ -1,6 +1,6 @@
 #!env/bin/python
 """
-Module containing functions to apply nst on images in a directory
+Module containing functions to apply nst on images in a directory on cloud 9
 
 Arguments:
     --interactive: Launches the interactive CLI for modifying images
